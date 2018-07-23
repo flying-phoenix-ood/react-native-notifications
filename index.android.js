@@ -1,4 +1,4 @@
-import {NativeModules, DeviceEventEmitter} from "react-native";
+import {AppRegistry, NativeModules, DeviceEventEmitter} from "react-native";
 import NotificationAndroid from "./notification";
 
 const RNNotifications = NativeModules.WixRNNotifications;
@@ -6,6 +6,10 @@ const RNNotifications = NativeModules.WixRNNotifications;
 let notificationReceivedListener;
 let notificationOpenedListener;
 let registrationTokenUpdateListener;
+
+let notificationReceivedEventListener;
+let notificationOpenedEventListener;
+let registrationTokenUpdateEventListener;
 
 export const EVENT_OPENED = "com.wix.reactnativenotifications.notificationOpened";
 export const EVENT_RECEIVED = "com.wix.reactnativenotifications.notificationReceived";
@@ -29,35 +33,43 @@ export const NotificationChannelAndroid = Object.freeze({
 
 export class NotificationsAndroid {
   static setNotificationOpenedListener(listener) {
-    notificationOpenedListener = DeviceEventEmitter.addListener(EVENT_OPENED, (notification) => listener(new NotificationAndroid(notification)));
+    NotificationsAndroid.clearNotificationOpenedListener();
+    notificationOpenedListener = listener;
+    notificationOpenedEventListener = DeviceEventEmitter.addListener(EVENT_OPENED, (notification) => listener(new NotificationAndroid(notification)));
   }
 
   static clearNotificationOpenedListener() {
-    if (notificationOpenedListener) {
-      notificationOpenedListener.remove();
+    if (notificationOpenedEventListener) {
+      notificationOpenedEventListener.remove();
+      notificationOpenedEventListener = null;
       notificationOpenedListener = null;
     }
   }
 
   static setNotificationReceivedListener(listener) {
-    notificationReceivedListener = DeviceEventEmitter.addListener(EVENT_RECEIVED, (notification) => listener(new NotificationAndroid(notification)));
+    NotificationsAndroid.clearNotificationReceivedListener();
+    notificationReceivedListener = listener;
+    notificationReceivedEventListener = DeviceEventEmitter.addListener(EVENT_RECEIVED, (notification) => listener(new NotificationAndroid(notification)));
   }
 
   static clearNotificationReceivedListener() {
-    if (notificationReceivedListener) {
-      notificationReceivedListener.remove();
+    if (notificationReceivedEventListener) {
+      notificationReceivedEventListener.remove();
+      notificationReceivedEventListener = null;
       notificationReceivedListener = null;
     }
   }
 
   static setRegistrationTokenUpdateListener(listener) {
     NotificationsAndroid.clearRegistrationTokenUpdateListener();
-    registrationTokenUpdateListener = DeviceEventEmitter.addListener(EVENT_REGISTERED, listener);
+    registrationTokenUpdateListener = listener;
+    registrationTokenUpdateEventListener = DeviceEventEmitter.addListener(EVENT_REGISTERED, listener);
   }
 
   static clearRegistrationTokenUpdateListener() {
-    if (registrationTokenUpdateListener) {
-      registrationTokenUpdateListener.remove();
+    if (registrationTokenUpdateEventListener) {
+      registrationTokenUpdateEventListener.remove();
+      registrationTokenUpdateEventListener = null;
       registrationTokenUpdateListener = null;
     }
   }
@@ -122,3 +134,23 @@ export class NotificationsAndroid {
     RNNotifications.consumeBackgroundQueue();
   }
 }
+
+AppRegistry.registerHeadlessTask('com.wix.reactnativenotifications.core.background.event', () => (async (event) => {
+  switch (event.name) {
+    case EVENT_OPENED:
+      if (notificationOpenedListener) {
+        notificationOpenedListener(new NotificationAndroid(event.data));
+      }
+      break;
+    case EVENT_RECEIVED:
+      if (notificationReceivedListener) {
+        notificationReceivedListener(new NotificationAndroid(event.data));
+      }
+      break;
+    case EVENT_REGISTERED:
+      if (registrationTokenUpdateListener) {
+        registrationTokenUpdateListener(event.data);
+      }
+      break;
+  }
+}));
