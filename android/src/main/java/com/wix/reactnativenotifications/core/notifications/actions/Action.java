@@ -16,7 +16,7 @@ import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
 public class Action {
 
-    private static final String NAME = "name";
+    private static final String IDENTIFIER = "identifier";
     private static final String REQUEST_CODE = "requestCode";
 
     private static final String ICON = "icon";
@@ -40,16 +40,16 @@ public class Action {
     }
 
     public NotificationCompat.Action build(final Context context, final int notificationId, final Bundle notificationBundle) {
-        final String name = properties.getString(NAME);
+        final String identifier = properties.getString(IDENTIFIER);
         final Integer iconId = drawableIdFromString(context, properties.getString(ICON));
         final String title = properties.getString(TITLE);
 
-        if (name == null || iconId == null || title == null) {
-            Log.e(LOGTAG, NAME + ", " + ICON + " and " + TITLE + " are all required fields for notification actions.");
+        if (identifier == null || iconId == null || title == null) {
+            Log.e(LOGTAG, IDENTIFIER + ", " + ICON + " and " + TITLE + " are all required fields for notification actions.");
             return null;
         }
 
-        final PendingIntent pendingIntent = buildPendingIntent(context, notificationId, notificationBundle, name);
+        final PendingIntent pendingIntent = buildPendingIntent(context, notificationId, notificationBundle);
         final RemoteInput remoteInput = buildRemoteInput();
 
         final NotificationCompat.Action.Builder actionBuilder = new NotificationCompat.Action.Builder(iconId, title, pendingIntent);
@@ -85,12 +85,10 @@ public class Action {
         jsIOHelper.sendEventToJS(ACTION_FIRED_EVENT_NAME, eventProperties);
     }
 
-    private PendingIntent buildPendingIntent(final Context context, final int notificationId, final Bundle notificationBundle, final String name) {
-        final String action = "android.intent.action."  + name.replaceAll("(.)(\\p{Upper})", "$1_$2").toUpperCase();
+    private PendingIntent buildPendingIntent(final Context context, final int notificationId, final Bundle notificationBundle) {
         final int requestCode = properties.getInt(REQUEST_CODE, notificationId);
 
         final Intent intent = new Intent(context, LocalNotificationService.class);
-        intent.setAction(action);
         intent.putExtra(LocalNotificationService.EXTRA_NOTIFICATION_ID, notificationId);
         intent.putExtra(LocalNotificationService.EXTRA_NOTIFICATION, notificationBundle);
         intent.putExtra(LocalNotificationService.EXTRA_ACTION, properties);
