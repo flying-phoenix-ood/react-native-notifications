@@ -68,7 +68,7 @@ export class NotificationsAndroid {
 
   static setActionFiredListener(listener) {
     NotificationsAndroid.clearActionFiredListener();
-    actionFiredListener = DeviceEventEmitter.addListener(EVENT_ACTION, (event) => listener(event.action, event.notificationId));
+    actionFiredListener = DeviceEventEmitter.addListener(EVENT_ACTION, (event) => listener(event.action, event.input, event.notificationId, new NotificationAndroid(event.notification)));
   }
 
   static clearActionFiredListener() {

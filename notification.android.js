@@ -59,4 +59,20 @@ export default class NotificationAndroid {
   getLightsOffMs() {
     return this.properties.lightsOffMs;
   }
+
+  getGroup() {
+    return this.properties.group;
+  }
+
+  getGroupSummary() {
+    return this.properties.groupSummary;
+  }
+
+  getActions() {
+    return this.properties.actions;
+  }
+
+  getStyle() {
+    return this.properties.style;
+  }
 }

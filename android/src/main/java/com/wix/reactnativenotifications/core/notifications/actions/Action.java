@@ -29,7 +29,9 @@ public class Action {
     private static final String REMOTE_INPUT_CHOICES = "choices";
 
     private static final String FIRED_EVENT_NOTIFICATION_ID = "notificationId";
+    private static final String FIRED_EVENT_NOTIFICATION = "notification";
     private static final String FIRED_EVENT_ACTION = "action";
+    private static final String FIRED_EVENT_INPUT = "input";
 
     private final Bundle properties;
 
@@ -37,7 +39,7 @@ public class Action {
         this.properties = properties;
     }
 
-    public NotificationCompat.Action build(final Context context, final int notificationId) {
+    public NotificationCompat.Action build(final Context context, final int notificationId, final Bundle notificationBundle) {
         final String name = properties.getString(NAME);
         final Integer iconId = drawableIdFromString(context, properties.getString(ICON));
         final String title = properties.getString(TITLE);
@@ -47,7 +49,7 @@ public class Action {
             return null;
         }
 
-        final PendingIntent pendingIntent = buildPendingIntent(context, notificationId, name);
+        final PendingIntent pendingIntent = buildPendingIntent(context, notificationId, notificationBundle, name);
         final RemoteInput remoteInput = buildRemoteInput();
 
         final NotificationCompat.Action.Builder actionBuilder = new NotificationCompat.Action.Builder(iconId, title, pendingIntent);
@@ -61,22 +63,36 @@ public class Action {
         return actionBuilder.build();
     }
 
-    public void onFired(final Context context, final int notificationId) {
+    public void onFired(final Context context, final Intent intent) {
+        final int notificationId = intent.getIntExtra(LocalNotificationService.EXTRA_NOTIFICATION_ID, -1);
+        final Bundle notificationBundle = intent.getBundleExtra(LocalNotificationService.EXTRA_NOTIFICATION);
+
+        final Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+        final String remoteInputKey = properties.containsKey(REMOTE_INPUT) ? properties.getBundle(REMOTE_INPUT).getString(REMOTE_INPUT_KEY) : null;
+
+        final String input = remoteInput != null && remoteInputKey != null ? remoteInput.getString(remoteInputKey) : null;
+
         final Bundle eventProperties = new Bundle();
         eventProperties.putInt(FIRED_EVENT_NOTIFICATION_ID, notificationId);
+        eventProperties.putBundle(FIRED_EVENT_NOTIFICATION, notificationBundle);
         eventProperties.putBundle(FIRED_EVENT_ACTION, properties);
+
+        if (input != null) {
+            eventProperties.putString(FIRED_EVENT_INPUT, input);
+        }
 
         final JsIOHelper jsIOHelper = new JsIOHelper(context);
         jsIOHelper.sendEventToJS(ACTION_FIRED_EVENT_NAME, eventProperties);
     }
 
-    private PendingIntent buildPendingIntent(final Context context, final int notificationId, final String name) {
+    private PendingIntent buildPendingIntent(final Context context, final int notificationId, final Bundle notificationBundle, final String name) {
         final String action = "android.intent.action."  + name.replaceAll("(.)(\\p{Upper})", "$1_$2").toUpperCase();
         final int requestCode = properties.getInt(REQUEST_CODE, notificationId);
 
         final Intent intent = new Intent(context, LocalNotificationService.class);
         intent.setAction(action);
         intent.putExtra(LocalNotificationService.EXTRA_NOTIFICATION_ID, notificationId);
+        intent.putExtra(LocalNotificationService.EXTRA_NOTIFICATION, notificationBundle);
         intent.putExtra(LocalNotificationService.EXTRA_ACTION, properties);
 
         return PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);

@@ -197,7 +197,7 @@ public class LocalNotification implements ILocalNotification {
 
         if (actions != null) {
             for (final Bundle actionProperties : actions) {
-                final NotificationCompat.Action action = new Action(actionProperties).build(mContext, notificationId);
+                final NotificationCompat.Action action = new Action(actionProperties).build(mContext, notificationId, mNotificationProps.asBundle());
 
                 if (action != null) {
                     builder.addAction(action);

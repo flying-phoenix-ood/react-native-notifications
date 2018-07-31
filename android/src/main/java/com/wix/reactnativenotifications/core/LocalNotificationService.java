@@ -31,16 +31,13 @@ public class LocalNotificationService extends IntentService {
         final Bundle notificationBundle = intent != null ? intent.getBundleExtra(EXTRA_NOTIFICATION) : null;
         final Bundle actionBundle = intent != null ? intent.getBundleExtra(EXTRA_ACTION) : null;
 
-        if (notificationBundle != null) {
+        if (actionBundle != null) {
+            final Action action = new Action(actionBundle);
+            action.onFired(this, intent);
+        } else if (notificationBundle != null) {
             final NotificationProps notificationProps = NotificationProps.fromBundle(this, notificationBundle);
             final ILocalNotification localNotification = LocalNotification.get(this, notificationProps);
             localNotification.onOpened();
-        }
-
-        if (actionBundle != null) {
-            final int notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1);
-            final Action action = new Action(actionBundle);
-            action.onFired(this, notificationId);
         }
     }
 }
