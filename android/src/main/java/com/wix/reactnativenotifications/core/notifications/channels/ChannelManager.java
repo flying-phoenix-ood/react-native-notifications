@@ -111,7 +111,6 @@ public final class ChannelManager {
     private static AudioAttributes getAudioAttributes(final ChannelProps channelProps) {
         final AudioAttributes.Builder builder = new AudioAttributes.Builder();
         builder.setLegacyStreamType(AudioManager.STREAM_NOTIFICATION);
-        builder.setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED);
 
         final Integer contentType = channelProps.getSoundContentType();
         final Integer usage = channelProps.getSoundUsage();
