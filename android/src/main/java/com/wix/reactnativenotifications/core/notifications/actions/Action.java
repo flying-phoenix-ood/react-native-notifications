@@ -86,7 +86,8 @@ public class Action {
     }
 
     private PendingIntent buildPendingIntent(final Context context, final int notificationId, final Bundle notificationBundle) {
-        final int requestCode = properties.getInt(REQUEST_CODE, notificationId);
+        final Object requestCodeNumber = properties.containsKey(REQUEST_CODE) ? properties.get(REQUEST_CODE) : null;
+        final int requestCode = requestCodeNumber != null ? ((Number) requestCodeNumber).intValue() : notificationId;
 
         final Intent intent = new Intent(context, LocalNotificationService.class);
         intent.putExtra(LocalNotificationService.EXTRA_NOTIFICATION_ID, notificationId);
