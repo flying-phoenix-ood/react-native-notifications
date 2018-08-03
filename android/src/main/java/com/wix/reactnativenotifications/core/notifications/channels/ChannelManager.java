@@ -56,6 +56,14 @@ public final class ChannelManager {
         }
     }
 
+    public static void deleteChannel(final Context context, final String channelId) {
+        final NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+
+        if (notificationManager != null) {
+            notificationManager.deleteNotificationChannel(channelId);
+        }
+    }
+
     @NonNull
     public static Map<String, ChannelProps> getAllChannelProps(final Context context) {
         final NotificationManager notificationManager = context.getSystemService(NotificationManager.class);

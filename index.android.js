@@ -100,6 +100,10 @@ export class NotificationsAndroid {
     return RNNotifications.createChannel(id, options);
   }
 
+  static deleteChannel(id) {
+    return RNNotifications.deleteChannel(id);
+  }
+
   static getChannel(id) {
     return RNNotifications.getChannel(id);
   }

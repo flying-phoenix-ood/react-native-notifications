@@ -109,6 +109,20 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     }
 
     @ReactMethod
+    public void deleteChannel(String channelId, Promise promise) {
+        Log.d(LOGTAG, "Native method invocation: deleteChannel");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final Context context = getReactApplicationContext().getApplicationContext();
+            ChannelManager.deleteChannel(context, channelId);
+            promise.resolve(null);
+        } else {
+            Log.e(LOGTAG, ERROR_MESSAGE_CHANNELS_NOT_SUPPORTED);
+            promise.reject(ERROR_CODE_CHANNELS_NOT_SUPPORTED, ERROR_MESSAGE_CHANNELS_NOT_SUPPORTED);
+        }
+    }
+
+    @ReactMethod
     public void getChannel(String channelId, Promise promise) {
         Log.d(LOGTAG, "Native method invocation: getChannel");
 
