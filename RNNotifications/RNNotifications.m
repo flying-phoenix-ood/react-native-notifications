@@ -59,7 +59,11 @@ RCT_ENUM_CONVERTER(UIUserNotificationActionBehavior, (@{
 
     UIMutableUserNotificationAction* action =[UIMutableUserNotificationAction new];
     action.activationMode = [RCTConvert UIUserNotificationActivationMode:details[@"activationMode"]];
-    action.behavior = [RCTConvert UIUserNotificationActionBehavior:details[@"behavior"]];
+
+    if ([action respondsToSelector:@selector(setBehavior:)]) {
+        action.behavior = [RCTConvert UIUserNotificationActionBehavior:details[@"behavior"]];
+    }
+
     action.authenticationRequired = [RCTConvert BOOL:details[@"authenticationRequired"]];
     action.destructive = [RCTConvert BOOL:details[@"destructive"]];
     action.title = [RCTConvert NSString:details[@"title"]];
