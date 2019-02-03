@@ -41,8 +41,8 @@ public class FcmTokenBridge {
         }
     }
 
-    private void sendReceivedEvent() {
-        final String token = mFirebaseInstanceId.getToken();
+    private void sendReceivedEvent() throws Exception {
+        final String token = mFirebaseInstanceId.getToken("719966674779", "FCM");   // replace "719966674779" with your own sender-id from your firebase project's settings
         Log.i(LOGTAG, "Firebase has a new token: FirebaseInstanceId=" + mFirebaseInstanceId.getId() + ", token=" + token);
         mJsIOHelper.sendEventToJS(TOKEN_RECEIVED_EVENT_NAME, token);
     }
